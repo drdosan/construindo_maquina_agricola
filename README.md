@@ -17,6 +17,10 @@ construindo_maquina_agricola/
 │   ├── app.py
 │   └── requirements.txt
 │
+├── dashboard/
+│   ├── app.py
+│   └── requirements.txt
+│
 ├── .gitignore
 └── README.md
 ```
@@ -25,10 +29,11 @@ construindo_maquina_agricola/
 
 - `sensores/`: Projeto da Fase 1, com o código C/C++ do ESP32 e imagem do circuito Wokwi.
 - `api_crud/`: Projeto da Fase 2, com a API Flask documentada com Swagger.
+- `dashboard/`: Projeto “Ir Além”, com dashboard interativo em Streamlit.
 - `main.ino`: Código-fonte responsável pela leitura dos sensores e envio dos dados via HTTP.
 - `simulacao_esp32.png`: Imagem ilustrativa da montagem simulada no Wokwi.
-- `app.py`: Código principal da API, contendo endpoints RESTful e integração com MySQL.
-- `requirements.txt`: Dependências necessárias para rodar a API Flask.
+- `app.py`: Código principal da API ou dashboard, dependendo da pasta.
+- `requirements.txt`: Dependências de cada módulo.
 - `.gitignore`: Arquivos e pastas ignorados pelo Git.
 - `README.md`: Este documento com explicações completas do projeto.
 
@@ -97,6 +102,52 @@ Acesse a documentação interativa da API em:
 - `requirements.txt` com dependências
 - Swagger UI embutido na aplicação para testes dos endpoints
 - Tabelas com dados fictícios para simulação
+
+---
+
+## 🌟 Projeto “Ir Além” – Dashboard Interativo com Streamlit
+
+Como parte das atividades opcionais da disciplina, este projeto também inclui um dashboard interativo que permite visualizar em tempo real os dados coletados pelos sensores instalados em campo.
+
+### 🎯 Objetivo
+
+Transformar dados técnicos em representações visuais fáceis de entender, possibilitando que qualquer usuário — mesmo sem conhecimento técnico — possa acompanhar:
+
+- Umidade do solo
+- pH
+- Níveis de fósforo e potássio
+- Nome dos sensores e seus valores ao longo do tempo
+
+### 🧰 Tecnologias Utilizadas
+
+- **Python**
+- **Streamlit** (aplicação web interativa)
+- **Pandas** (manipulação de dados)
+- **Plotly** (visualização gráfica)
+- **Integração com API Flask (Fase 2)**
+
+### 🖥️ Funcionalidades do Painel
+
+- Gráficos por sensor com separação por cor
+- Tabela de dados com nomes reais dos sensores
+- Atualização em tempo real dos dados com base na API
+- Interface simples acessível via navegador
+
+### ▶️ Como Executar
+
+```bash
+cd dashboard
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Depois disso, acesse o painel em: [http://localhost:8501](http://localhost:8501)
+
+### 📂 Entregáveis
+
+- `dashboard/app.py`: Código completo do painel
+- `dashboard/requirements.txt`: Dependências necessárias
+- Atualização automática com base na API desenvolvida
 
 ---
 
