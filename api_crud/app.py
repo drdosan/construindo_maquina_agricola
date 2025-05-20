@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import pymysql
 from datetime import datetime
 from flasgger import Swagger, swag_from
+import requests
 
 app = Flask(__name__)
 template = {
@@ -19,6 +20,10 @@ template = {
 
 swagger = Swagger(app, template=template)
 
+API_KEY = "376b94e3d3f0dab77f7653f5d661c43e"
+CIDADE = "São Paulo"
+URL_CLIMA = f"https://api.openweathermap.org/data/2.5/forecast?q={CIDADE}&appid={API_KEY}&lang=pt_br&units=metric"
+
 # CONFIGURAÇÕES DO MYSQL
 def get_connection():
     return pymysql.connect(
@@ -28,6 +33,14 @@ def get_connection():
         database='bsconsul_fiap',
         cursorclass=pymysql.cursors.DictCursor
     )
+
+def vai_chover():
+    resp = requests.get(URL_CLIMA)
+    dados = resp.json()
+    for previsao in dados["list"][:8]:  # próximas 24h
+        if 'rain' in previsao and previsao['rain'].get('3h', 0) > 0:
+            return True
+    return False    
 
 # ========================= PRODUTOR =========================
 
@@ -417,6 +430,53 @@ def delete_leitura(id):
             cur.execute("DELETE FROM LEITURA_SENSOR WHERE cd_leitura=%s", (id,))
         conn.commit()
     return jsonify({'message': 'Leitura deletada'})
+
+
+# ================= INTEGRAÇÃO OPEN WEATHER =================
+def vai_chover():
+    url = f"https://api.openweathermap.org/data/2.5/forecast?q=Sao Paulo,br&appid={API_KEY}&units=metric&lang=pt_br"
+    resp = requests.get(url)
+    dados = resp.json()
+
+    for previsao in dados["list"][:8]:  # próximas 24h (~8 blocos de 3h)
+        if 'rain' in previsao and previsao['rain'].get('3h', 0) > 0:
+            return True
+    return False
+
+@app.route("/clima/prever-irrigacao", methods=["POST"])
+@swag_from({
+    'tags': ['Clima'],
+    'responses': {
+        201: {'description': 'Decisão de irrigação baseada na previsão do tempo foi salva'}
+    }
+})
+def prever_irrigacao():
+    pode_irrigar = not vai_chover()
+    conn = get_connection()
+    with conn:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO DECISAO_IRRIGACAO (pode_irrigar) VALUES (%s)", (pode_irrigar,))
+        conn.commit()
+    return jsonify({
+        "pode_irrigar": pode_irrigar,
+        "mensagem": "Decisão salva com sucesso"
+    }), 201
+
+@app.route("/status-irrigacao", methods=["GET"])
+@swag_from({
+    'tags': ['Clima'],
+    'responses': {
+        200: {'description': 'Status atual da irrigação baseado na última previsão climática'}
+    }
+})
+def status_irrigacao():
+    conn = get_connection()
+    with conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT pode_irrigar FROM DECISAO_IRRIGACAO ORDER BY data_hora DESC LIMIT 1")
+            row = cur.fetchone()
+    return jsonify({"pode_irrigar": row["pode_irrigar"] if row else True})
+
 
 # ================= RUN APP =================
 

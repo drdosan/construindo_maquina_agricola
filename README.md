@@ -151,6 +151,44 @@ Depois disso, acesse o painel em: [http://localhost:8501](http://localhost:8501)
 
 ---
 
+## ☁️ Projeto “Ir Além 2” – Integração com API Meteorológica (OpenWeather)
+
+Este desafio opcional demonstra a capacidade do sistema de irrigação em tomar decisões mais inteligentes, utilizando dados climáticos reais via API pública.
+
+### 🎯 Objetivo
+
+Consultar a previsão do tempo real (próximas 24h) e decidir, de forma automática, se a irrigação deve ser executada ou suspensa para evitar desperdício de água em caso de chuva.
+
+### 🔗 Integração com OpenWeatherMap
+
+- API utilizada: [OpenWeatherMap - Forecast 5 Days](https://openweathermap.org/forecast5)
+- Requisição feita no endpoint: `/data/2.5/forecast`
+- Cidade consultada: São Paulo (BR)
+- A resposta é processada para identificar campos como `rain.3h` nas próximas 8 faixas de 3h (24h totais)
+
+### 💡 Lógica aplicada
+
+```
+Se houver previsão de chuva nas próximas 24h → Não irrigar
+Senão → Permitir irrigação conforme sensores
+```
+
+### 🔧 Implementação
+
+- Um endpoint adicional foi adicionado à API Flask: `POST /clima/prever-irrigacao`
+  - Ele consulta a previsão e grava no banco de dados a decisão (permitir ou não irrigar)
+- Outro endpoint `GET /status-irrigacao` é consumido pelo ESP32 no loop principal
+  - Se `pode_irrigar = true` → os dados são enviados via POST normalmente
+  - Se `pode_irrigar = false` → o envio é bloqueado e a bomba permanece desligada
+
+### 📂 Entregáveis
+
+- Código Flask atualizado com os endpoints `/clima/prever-irrigacao` e `/status-irrigacao`
+- Integração no código `.ino` com verificação da decisão antes de enviar a leitura
+- Lógica pronta para expansão futura com IA, sensores climáticos ou regras avançadas
+
+---
+
 ## 📊 Justificativa Técnica
 
 - A estrutura de banco foi modelada com base em entidades do MER proposto na Fase 2, permitindo normalização dos dados e rastreabilidade por produtor, cultura, sensor e leitura.

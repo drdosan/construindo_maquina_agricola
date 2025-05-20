@@ -11,7 +11,8 @@
 
 const char* ssid = "Wokwi-GUEST";
 const char* password = "";
-const char* serverUrl = "http://192.168.0.151:5000/leituras";  // coloque o IP da sua máquina local com a API rodando
+const char* serverUrl = "http://192.168.0.151:5000/leituras";
+const char* statusUrl = "http://192.168.0.151:5000/status-irrigacao";
 
 DHT dht(PIN_UMIDADE, DHTTYPE);
 unsigned long ultimoToggle = 0;
@@ -33,6 +34,33 @@ void setup() {
   Serial.println("✅ Conectado!");
 }
 
+bool verificarPodeIrrigar() {
+  HTTPClient http;
+  http.begin(statusUrl);
+  int httpCode = http.GET();
+
+  if (httpCode == 200) {
+    String payload = http.getString();
+    StaticJsonDocument<128> doc;
+    DeserializationError erro = deserializeJson(doc, payload);
+
+    if (!erro) {
+      bool pode = doc["pode_irrigar"];
+      Serial.print("🔍 Status de irrigação: ");
+      Serial.println(pode ? "Permitido ✅" : "Bloqueado 🚫");
+      return pode;
+    } else {
+      Serial.println("❌ Erro ao interpretar resposta JSON");
+    }
+  } else {
+    Serial.print("❌ Erro ao consultar status: ");
+    Serial.println(httpCode);
+  }
+
+  http.end();
+  return false;  // se der erro, previne irrigação
+}
+
 void loop() {
   unsigned long agora = millis();
 
@@ -49,32 +77,36 @@ void loop() {
 
   if (!isnan(umidade) && !isnan(temperatura)) {
     if (WiFi.status() == WL_CONNECTED) {
-      HTTPClient http;
-      http.begin(serverUrl);
-      http.addHeader("Content-Type", "application/json");
+      if (verificarPodeIrrigar()) {
+        HTTPClient http;
+        http.begin(serverUrl);
+        http.addHeader("Content-Type", "application/json");
 
-      StaticJsonDocument<256> json;
-      json["cd_sensor_instalado"] = 1;
-      json["valor_umidade"] = umidade;
-      json["valor_ph"] = ph;
-      json["valor_fosforo"] = fosforo ? 1 : 0;
-      json["valor_potassio"] = potassio ? 1 : 0;
+        StaticJsonDocument<256> json;
+        json["cd_sensor_instalado"] = 1;
+        json["valor_umidade"] = umidade;
+        json["valor_ph"] = ph;
+        json["valor_fosforo"] = fosforo ? 1 : 0;
+        json["valor_potassio"] = potassio ? 1 : 0;
 
-      String jsonString;
-      serializeJson(json, jsonString);
+        String jsonString;
+        serializeJson(json, jsonString);
 
-      int httpResponseCode = http.POST(jsonString);
-      Serial.print("POST enviado → Código: ");
-      Serial.println(httpResponseCode);
+        int httpResponseCode = http.POST(jsonString);
+        Serial.print("POST enviado → Código: ");
+        Serial.println(httpResponseCode);
 
-      if (httpResponseCode > 0) {
-        String resposta = http.getString();
-        Serial.println("✔️ Resposta: " + resposta);
+        if (httpResponseCode > 0) {
+          String resposta = http.getString();
+          Serial.println("✔️ Resposta: " + resposta);
+        } else {
+          Serial.println("❌ Falha no envio");
+        }
+
+        http.end();
       } else {
-        Serial.println("❌ Falha no envio");
+        Serial.println("🌧️ Irrigação suspensa por previsão de chuva.");
       }
-
-      http.end();
     } else {
       Serial.println("⚠️ Wi-Fi desconectado");
     }
