@@ -90,6 +90,14 @@ A segunda fase consiste em simular o envio dos dados dos sensores para um sistem
 - `/sensores-instalados` - Associação de sensores a culturas
 - `/leituras` - Registro das leituras de sensores
 
+### ▶️ Como Executar
+
+```bash
+cd api_crud
+pip install -r requirements.txt
+python app.py
+```
+
 ### 🔍 Documentação Swagger
 
 Acesse a documentação interativa da API em:
