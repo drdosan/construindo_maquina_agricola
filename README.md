@@ -5,6 +5,15 @@ Projeto acadêmico dividido em duas fases principais: **coleta de dados ambienta
 
 ---
 
+### ▶️ Vídeo de Evidência do Funcionamento do Projeto.
+
+
+
+[https://youtu.be/ClA9DwxtclQ](https://youtu.be/ClA9DwxtclQ)
+
+
+---
+
 ## 📁 Estrutura do Repositório
 
 ```
