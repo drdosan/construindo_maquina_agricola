@@ -89,7 +89,7 @@ A segunda fase consiste em simular o envio dos dados dos sensores para um sistem
 
 Acesse a documentação interativa da API em:
 
-👉 **[http://localhost:5000/apidocs](http://localhost:5000/apidocs)**
+👉 http://{base_url_api}:5000/apidocs
 
 ### 📂 Entregáveis:
 
