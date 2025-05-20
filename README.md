@@ -214,6 +214,11 @@ Senão → Permitir irrigação conforme sensores
 
 ---
 
-## 📜 Licença
+## 🧑‍🤝‍🧑 Membros do Grupo
 
-Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
+| Matrícula                 | Aluno               											  |
+|---------------------------|---------------------------------------------|
+|        RM 565150          | Andre de Oliveira Santos Burger							|
+|        RM 565497          | Vera Maria Chaves de Souza									| 
+|        RM 565286          | Diogo Rebello dos Santos										|
+|        RM 565555          | Marcos Vinícius dos Santos Fernandes				|
